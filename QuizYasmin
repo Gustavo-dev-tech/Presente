@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quiz para a Princesa</title>
+    <style>
+        /* Paleta de Cores Romântica */
+        :root {
+            --fundo-suave: #f7f3f0;
+            --texto-principal: #383e44;
+            --rosa-destaque: #e64d64;
+            --rosa-claro: #f2a2b0;
+            --branco-puro: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--fundo-suave);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--texto-principal);
+            text-align: center;
+        }
+
+        #quiz-container {
+            background-color: var(--branco-puro);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        #quiz-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--rosa-destaque);
+            margin-bottom: 20px;
+        }
+
+        #score {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: var(--rosa-claro);
+            color: var(--branco-puro);
+            padding: 8px 16px;
+            border-radius: 12px;
+        }
+
+        #timer {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--rosa-destaque);
+            color: var(--branco-puro);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        #opcoes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .opcao {
+            background: var(--rosa-claro);
+            color: var(--branco-puro);
+            border: none;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .opcao:hover {
+            background-color: var(--rosa-destaque);
+            transform: scale(1.02);
+        }
+
+        .opcao:disabled {
+            background: var(--fundo-suave);
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #final-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding-top: 20px;
+            width: 100%;
+        }
+
+        .mensagem-final {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--rosa-destaque);
+        }
+
+        .pontuacao-final {
+            font-size: 18px;
+            font-weight: normal;
+        }
+        
+        .botoes-final {
+            display: flex;
+            gap: 10px;
+        }
+
+        .botoes-final button {
+            background-color: var(--rosa-claro);
+            color: var(--branco-puro);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .botoes-final button:hover {
+            background-color: var(--rosa-destaque);
+        }
+
+        /* Esconde os botões no print */
+        @media print {
+            .botoes-final {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div id="quiz-content">
+        <h1 id="pergunta"></h1>
+        <div id="score">❤️ 0</div>
+        <div id="timer">10</div>
+        <div id="opcoes-container"></div>
+    </div>
+    
+    <div id="final-container">
+        <p class="mensagem-final">Parabéns, minha princesa! 🎉</p>
+        <p class="pontuacao-final">Você fez <span id="pontuacao-final"></span> pontos! ❤️</p>
+        <div class="botoes-final">
+            <button id="reiniciar">Jogar Novamente</button>
+            <button id="btn-print" onclick="window.print()">Tirar Print</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Suas perguntas e configuração Firebase
+    const perguntas = [
+        { texto: "Em que lugar tivemos nosso primeiro beijo?", opcoes: ["Praia do Forte", "Parque do Ibirapuera", "Lagoa do Taquaral", "Em casa"], correta: 2 },
+        { texto: "Qual a nossa série favorita para ver juntos?", opcoes: ["The Office", "Friends", "Game of Thrones", "Black Mirror"], correta: 0 },
+        { texto: "Nossa comida favorita pra pedir no Ifood é...?", opcoes: ["Sushi", "Pizza", "Hambúrguer", "Comida Mexicana"], correta: 1 },
+        { texto: "Qual a música que mais nos marcou?", opcoes: ["Céu Azul", "Oceano", "Outra Vida", "Girassol"], correta: 0 }
+    ];
+
+    let perguntaAtual = 0;
+    let pontuacao = 0;
+    let tempoRest = 10;
+    let intervalo;
+
+    const perguntaEl = document.getElementById("pergunta");
+    const opcoesContainer = document.getElementById("opcoes-container");
+    const timerEl = document.getElementById("timer");
+    const scoreEl = document.getElementById("score");
+    const quizContent = document.getElementById("quiz-content");
+    const finalContainer = document.getElementById("final-container");
+    const pontuacaoFinalEl = document.getElementById("pontuacao-final");
+    const reiniciarBtn = document.getElementById("reiniciar");
+
+    function mostrarPergunta() {
+        if (perguntaAtual < perguntas.length) {
+            const p = perguntas[perguntaAtual];
+            perguntaEl.textContent = p.texto;
+            opcoesContainer.innerHTML = "";
+            p.opcoes.forEach((opcao, i) => {
+                const btn = document.createElement("button");
+                btn.classList.add("opcao");
+                btn.textContent = opcao;
+                btn.onclick = () => selecionarResposta(i);
+                opcoesContainer.appendChild(btn);
+            });
+            iniciarTimer();
+        } else {
+            finalizarQuiz();
+        }
+    }
+
+    function iniciarTimer() {
+        tempoRest = 10;
+        timerEl.textContent = tempoRest;
+        clearInterval(intervalo);
+        intervalo = setInterval(() => {
+            tempoRest--;
+            timerEl.textContent = tempoRest;
+            if (tempoRest <= 0) {
+                clearInterval(intervalo);
+                perguntaAtual++;
+                mostrarPergunta();
+            }
+        }, 1000);
+    }
+
+    function selecionarResposta(indice) {
+        clearInterval(intervalo);
+        const correta = perguntas[perguntaAtual].correta;
+        if (indice === correta) {
+            pontuacao++;
+        }
+        scoreEl.textContent = `❤️ ${pontuacao}`;
+        perguntaAtual++;
+        mostrarPergunta();
+    }
+
+    function finalizarQuiz() {
+        quizContent.style.display = 'none';
+        finalContainer.style.display = 'flex';
+        pontuacaoFinalEl.textContent = `${pontuacao} de ${perguntas.length}`;
+    }
+
+    reiniciarBtn.onclick = () => location.reload();
+
+    // Inicia o quiz automaticamente
+    mostrarPergunta();
+</script>
+</body>
+</html>
