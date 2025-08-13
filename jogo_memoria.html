@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        /* Paleta de Cores do Jogo da Memória */
+        :root {
+            --fundo-suave: #f7f0f5; /* Lilás bem claro */
+            --texto-principal: #5e4d66; /* Lilás escuro */
+            --lilás-destaque: #8a2be2; /* Lilás vibrante */
+            --rosa-claro: #f2a2b0;
+            --rosa-destaque: #e64d64;
+            --branco-puro: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--fundo-suave);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            color: var(--texto-principal);
+            text-align: center;
+        }
+
+        .game-container {
+            background-color: var(--branco-puro);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 95%;
+            width: 700px; /* Mais espaço na tela */
+        }
+
+        h1 {
+            color: var(--lilás-destaque);
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: var(--texto-principal);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            justify-items: center;
+        }
+        
+        .card {
+            width: 100%; /* Dimensão padrão para as cartas */
+            height: 80px;
+            position: relative;
+            transform: scale(1);
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
+        }
+
+        .card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .card-face, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-face {
+            transform: rotateY(180deg);
+            background-color: var(--branco-puro);
+            font-size: 3em;
+            padding: 10px;
+        }
+        .card-face img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .card-back {
+            background-color: var(--rosa-claro);
+            border: 3px solid var(--lilás-destaque);
+        }
+
+        .final-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 30px;
+            animation: fadeIn 1s;
+        }
+
+        .final-screen h2 {
+            color: var(--lilás-destaque);
+            font-size: 2.5em;
+        }
+
+        .final-screen button {
+            background-color: var(--lilás-destaque);
+            color: var(--branco-puro);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .final-screen button:hover {
+            background-color: var(--rosa-destaque);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsividade */
+        @media (max-width: 868px) {
+            .card {
+                width: 100px;
+                height: 80px;
+            }
+            .game-board {
+                gap: 8px;
+            }
+            .game-container {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .card {
+                width: 60px;
+                height: 60px;
+            }
+            .game-board {
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="game-info">
+        <span class="attempts">Tentativas: 0</span>
+        <span class="matches">Pares: 0</span>
+    </div>
+
+    <div class="game-board"></div>
+
+    <div class="final-screen">
+        <h2>Parabéns, minha princesa! ❤️</h2>
+        <button onclick="reiniciarJogo()">Jogar Novamente</button>
+    </div>
+</div>
+
+<script>
+    // Agora o array de cartas agrupa o valor (emoji/imagem) e a cor de fundo
+    //const cartas = [
+    //    { valor: '❤️', corFundo: '#f2a2b0' },
+      //  { valor: '🧡', corFundo: '#f7c8a4' },
+    //    { valor: '💛', corFundo: '#f7e6a4' },
+    //    { valor: '💚', corFundo: '#c8f7a4' },
+    //    { valor: '💙', corFundo: '#a4d4f7' },
+    //    { valor: '💜', corFundo: '#d4a4f7' },
+    //    { valor: '🤎', corFundo: '#c0a48b' },
+    //    { valor: '🖤', corFundo: '#a4a4a4' }
+    //    ];
+    const cartas = [
+        { valor: 'Foto1.jpg', corFundo: '#f2a2b0' },
+        { valor: 'Foto2.JPEG', corFundo: '#f7c8a4' },
+        { valor: 'Foto3.JPEG', corFundo: '#f7e6a4' },
+        { valor: 'Foto4.JPEG', corFundo: '#c8f7a4' },
+        { valor: 'Foto5.JPEG', corFundo: '#a4d4f7' },
+        { valor: 'Foto6.JPEG', corFundo: '#d4a4f7' },
+        { valor: 'Foto7.JPEG', corFundo: '#c0a48b' },
+        { valor: 'Foto8.JPEG', corFundo: '#a4a4a4' }
+    ];
+    
+    // Você pode usar suas fotos aqui. Exemplo:
+    // const cartas = [
+    //     { valor: 'foto1.jpg', corFundo: '#f2a2b0' },
+    //     { valor: 'foto2.jpg', corFundo: '#f7c8a4' },
+    //     ...
+    // ];
+
+    const gameBoard = document.querySelector('.game-board');
+    const finalScreen = document.querySelector('.final-screen');
+    const attemptsEl = document.querySelector('.attempts');
+    const matchesEl = document.querySelector('.matches');
+
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let tentativas = 0;
+    let paresEncontrados = 0;
+
+    function criarCartas() {
+        const cartasComPares = [...cartas, ...cartas];
+        const cartasEmbaralhadas = cartasComPares.sort(() => Math.random() - 0.5);
+        gameBoard.innerHTML = '';
+        
+        cartasEmbaralhadas.forEach(carta => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.valor = carta.valor;
+            card.dataset.cor = carta.corFundo;
+
+            card.innerHTML = `
+                <div class="card-face">${isImage(carta.valor) ? `<img src="${carta.valor}" alt="card">` : carta.valor}</div>
+                <div class="card-back"></div>
+            `;
+            
+            card.addEventListener('click', flipCard);
+            gameBoard.appendChild(card);
+        });
+    }
+
+    function isImage(value) {
+        return value.includes('.');
+    }
+
+    function flipCard() {
+        if (lockBoard) return;
+        if (this === firstCard) return;
+
+        this.classList.add('flip');
+        
+        // Aplica a cor de fundo ao virar
+        this.querySelector('.card-face').style.backgroundColor = this.dataset.cor;
+
+        if (!hasFlippedCard) {
+            hasFlippedCard = true;
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        tentativas++;
+        attemptsEl.textContent = `Tentativas: ${tentativas}`;
+        checkForMatch();
+    }
+
+    function checkForMatch() {
+        let isMatch = firstCard.dataset.valor === secondCard.dataset.valor;
+        isMatch ? disableCards() : unflipCards();
+    }
+
+    function disableCards() {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        
+        paresEncontrados++;
+        matchesEl.textContent = `Pares: ${paresEncontrados}`;
+
+        resetBoard();
+        checkWin();
+    }
+
+    function unflipCards() {
+        lockBoard = true;
+
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+            // Remove a cor de fundo ao desvirar
+            firstCard.querySelector('.card-face').style.backgroundColor = 'var(--branco-puro)';
+            secondCard.querySelector('.card-face').style.backgroundColor = 'var(--branco-puro)';
+            resetBoard();
+        }, 1000);
+    }
+
+    function resetBoard() {
+        [hasFlippedCard, lockBoard] = [false, false];
+        [firstCard, secondCard] = [null, null];
+    }
+    
+    function checkWin() {
+        if (paresEncontrados === cartas.length) {
+            gameBoard.style.display = 'none';
+            finalScreen.style.display = 'flex';
+        }
+    }
+
+    function reiniciarJogo() {
+        finalScreen.style.display = 'none';
+        gameBoard.style.display = 'grid';
+        tentativas = 0;
+        paresEncontrados = 0;
+        attemptsEl.textContent = `Tentativas: 0`;
+        matchesEl.textContent = `Pares: 0`;
+        
+        criarCartas();
+    }
+
+    criarCartas();
+
+</script>
+</body>
+</html>

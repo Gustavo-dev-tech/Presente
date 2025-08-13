@@ -1,32 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yasmin</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+    <title>Para a Princesa</title>
+    <style>
+        /* Paleta de Cores Romântica do Quiz */
+        :root {
+            --fundo-suave: #f7f3f0;
+            --texto-principal: #383e44;
+            --rosa-destaque: #e64d64;
+            --rosa-claro: #f2a2b0;
+            --branco-puro: #fff;
+        }
 
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--fundo-suave);
+            color: var(--texto-principal);
+            text-align: center;
+        }
+
+        .menu-container {
+            background-color: var(--branco-puro);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 600px; /* Aumenta a largura do contêiner */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--rosa-destaque);
+            font-size: 36px; /* Aumenta o tamanho da fonte */
+            margin-bottom: 20px;
+        }
+
+        .coracao {
+            font-size: 50px; /* Aumenta o tamanho do coração */
+            margin-bottom: 10px;
+            color: var(--rosa-destaque);
+        }
+
+        .botoes-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .botao-menu {
+            background-color: var(--rosa-claro);
+            color: var(--branco-puro);
+            border: none;
+            padding: 20px; /* Aumenta o padding para ocupar mais espaço */
+            border-radius: 50px;
+            font-size: 20px; /* Aumenta o tamanho da fonte */
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .botao-menu:hover {
+            background-color: var(--rosa-destaque);
+            transform: scale(1.02);
+        }
+        /* Estilos para usar mais cores da paleta */
+        .botao-menu:nth-child(2n) {
+            background-color: var(--rosa-destaque);
+        }
+        .botao-menu:nth-child(2n):hover {
+            background-color: var(--rosa-claro);
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .menu-container {
+                padding: 40px 30px;
+                width: 95%;
+            }
+            h1 {
+                font-size: 30px;
+            }
+            .coracao {
+                font-size: 50px;
+            }
+            .botao-menu {
+                font-size: 18px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
 <body>
-    <div id="responsivo">
-        <div id="titulo">
-            <br>
-            <h2 id="coracao">❤️</h2>
-            <h2>Feliz aniversario minha princesa</h2>                
-        <div id="botoes">
-            <br><br><br>
+    <div class="menu-container">
+        <h2 class="coracao">❤️</h2>
+        <h1>Feliz Aniversário, minha princesa!</h1>
+        <div class="botoes-menu">
             <a href="Quiz.html">
-            <button class="botao">Quiz relacionamento</button></a>
-            <br>
-            <a href="">
-            <button class="botao">Nossas palavras</button></a>
-            <br>
-            <a href="">
-            <button class="botao">Jogo da memoria com nossas fotos</button></a>
-            <br>
-            <a href="">
-            <button class="botao">Relogio de contagem regressiva</button></a>
-        </div>
+                <button class="botao-menu">Quiz do relacionamento</button>
+            </a>
+            <a href="#">
+                <button class="botao-menu">Nossas palavras</button>
+            </a>
+            <a href="jogo_memoria.html">
+                <button class="botao-menu">Jogo da memória com nossas fotos</button>
+            </a>
+            <a href="#">
+                <button class="botao-menu">Relógio de contagem regressiva</button>
+            </a>
         </div>
     </div>
 </body>

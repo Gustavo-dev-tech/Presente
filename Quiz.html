@@ -13,7 +13,7 @@
             --rosa-claro: #f2a2b0;
             --branco-puro: #fff;
             --verde-acerto: #4CAF50;
-            --vermelho-erro: #e74c3c; /* Nova cor para a mensagem de erro */
+            --vermelho-erro: #e74c3c;
         }
 
         * {
@@ -143,10 +143,12 @@
         
         .botoes-final {
             display: flex;
+            flex-direction: column; /* Botões agora empilham verticalmente */
             gap: 10px;
+            width: 100%;
         }
 
-        .botoes-final button {
+        .botoes-final button, .botoes-final a button {
             background-color: var(--rosa-claro);
             color: var(--branco-puro);
             padding: 12px 24px;
@@ -154,13 +156,14 @@
             border-radius: 50px;
             font-size: 16px;
             cursor: pointer;
+            width: 100%;
         }
         
-        .botoes-final button:hover {
+        .botoes-final button:hover, .botoes-final a button:hover {
             background-color: var(--rosa-destaque);
         }
         
-        /* Estilo para a mensagem de acerto */
+        /* Estilos para as mensagens de feedback */
         #feedback-acerto, #feedback-erro {
             display: none;
             position: absolute;
@@ -181,6 +184,15 @@
         #feedback-erro {
             background-color: var(--vermelho-erro);
             color: var(--branco-puro);
+        }
+        /* Estilos para as imagens de feedback */
+        #imagem-acerto, #imagem-erro {
+            width: 100px;
+            margin-top: 10px;
+        }
+        #imagem-final {
+            width: 150px;
+            margin-top: 20px;
         }
         
         /* Esconde os botões no print */
@@ -204,14 +216,24 @@
     <div id="final-container">
         <p class="mensagem-final">Parabéns, minha princesa! 🎉</p>
         <p class="pontuacao-final">Você fez <span id="pontuacao-final"></span> pontos! ❤️</p>
+        <img id="imagem-final" src="" alt="Imagem de resultado final" style="width: 150px; margin-top: 20px;">
         <div class="botoes-final">
             <button id="reiniciar">Jogar Novamente</button>
             <button id="btn-print">Tirar Print</button>
+            <a href="index.html">
+                <button>Voltar ao Menu inicial</button>
+            </a>
         </div>
     </div>
     
-    <div id="feedback-acerto"></div>
-    <div id="feedback-erro"></div>
+    <div id="feedback-acerto">
+        <span>Parabéns, você acertou! ❤️</span>
+        <img id="imagem-acerto" src="" alt="Imagem de acerto">
+    </div>
+    <div id="feedback-erro">
+        <span>Você não me ama! 😭</span>
+        <img id="imagem-erro" src="" alt="Imagem de erro">
+    </div>
 </div>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -239,18 +261,37 @@
     const reiniciarBtn = document.getElementById("reiniciar");
     const btnPrint = document.getElementById("btn-print");
     const feedbackAcertoEl = document.getElementById("feedback-acerto");
-    const feedbackErroEl = document.getElementById("feedback-erro"); // Novo elemento de erro
+    const feedbackErroEl = document.getElementById("feedback-erro");
+    const imagemAcertoEl = document.getElementById("imagem-acerto");
+    const imagemErroEl = document.getElementById("imagem-erro");
+    const imagemFinalEl = document.getElementById("imagem-final");
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
 
     function mostrarPergunta() {
         if (perguntaAtual < perguntas.length) {
             const p = perguntas [perguntaAtual];
             perguntaEl.textContent = p.texto;
             opcoesContainer.innerHTML = "";
-            p.opcoes.forEach((opcao, i) => {
+
+            const opcoesEmbaralhadas = [...p.opcoes];
+            shuffleArray(opcoesEmbaralhadas);
+            
+            const respostaCorreta = p.opcoes[p.correta];
+
+            opcoesEmbaralhadas.forEach(opcao => {
                 const btn = document.createElement("button");
                 btn.classList.add("opcao");
                 btn.textContent = opcao;
-                btn.onclick = () => selecionarResposta(btn, i);
+                
+                const acertou = opcao === respostaCorreta;
+                btn.onclick = () => selecionarResposta(btn, acertou);
+                
                 opcoesContainer.appendChild(btn);
             });
             iniciarTimer();
@@ -274,19 +315,17 @@
         }, 1000);
     }
 
-    function selecionarResposta(btnClicado, indice) {
+    function selecionarResposta(btnClicado, acertou) {
         clearInterval(intervalo);
         const opcoes = opcoesContainer.querySelectorAll('.opcao');
         opcoes.forEach(btn => btn.disabled = true);
 
-        const correta = perguntas[perguntaAtual].correta;
-
-        if (indice === correta) {
+        if (acertou) {
             pontuacao++;
             scoreEl.textContent = `❤️ ${pontuacao}`;
             btnClicado.classList.add('correta');
 
-            feedbackAcertoEl.textContent = "Parabéns, você acertou! ❤️";
+            imagemAcertoEl.src = 'APAIXONADA.png';
             feedbackAcertoEl.style.display = 'block';
 
             setTimeout(() => {
@@ -295,7 +334,7 @@
                 mostrarPergunta();
             }, 1500);
         } else {
-            feedbackErroEl.textContent = "Você não me ama! 😭";
+            imagemErroEl.src = 'RAIVA.png';
             feedbackErroEl.style.display = 'block';
 
             setTimeout(() => {
@@ -309,7 +348,21 @@
     function finalizarQuiz() {
         quizContent.style.display = 'none';
         finalContainer.style.display = 'flex';
+        
+        const porcentagemAcertos = (pontuacao / perguntas.length) * 100;
         pontuacaoFinalEl.textContent = `${pontuacao} de ${perguntas.length}`;
+        
+        if (porcentagemAcertos >= 80) {
+            imagemFinalEl.src = 'APAIXONADA.png';
+        } else if (porcentagemAcertos >= 50) {
+            imagemFinalEl.src = 'FELIZ.png';
+        } else if (porcentagemAcertos >= 25) {
+            imagemFinalEl.src = 'NEUTRA.png';
+        } else if (porcentagemAcertos >= 0) {
+            imagemFinalEl.src = 'RAIVA.png';
+        } else {
+            imagemFinalEl.src = 'CHORANDO.png';
+        }
     }
 
     function tirarPrint() {
