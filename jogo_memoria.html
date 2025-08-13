@@ -119,9 +119,28 @@
         .final-screen h2 {
             color: var(--lilás-destaque);
             font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .final-screen p {
+            font-size: 1.2em;
+            margin-top: 0;
+            color: var(--texto-principal);
         }
 
-        .final-screen button {
+        .final-screen img {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        .final-screen .botoes {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .final-screen .botoes a, .final-screen .botoes button {
             background-color: var(--lilás-destaque);
             color: var(--branco-puro);
             border: none;
@@ -130,9 +149,11 @@
             font-size: 1.2em;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
         }
 
-        .final-screen button:hover {
+        .final-screen .botoes a:hover, .final-screen .botoes button:hover {
             background-color: var(--rosa-destaque);
         }
 
@@ -144,7 +165,7 @@
         /* Responsividade */
         @media (max-width: 868px) {
             .card {
-                width: 100px;
+                width: 100%;
                 height: 80px;
             }
             .game-board {
@@ -162,6 +183,12 @@
             .game-board {
                 gap: 5px;
             }
+            .final-screen h2 {
+                font-size: 2em;
+            }
+            .final-screen img {
+                width: 120px;
+            }
         }
     </style>
 </head>
@@ -177,22 +204,19 @@
 
     <div class="final-screen">
         <h2>Parabéns, minha princesa! ❤️</h2>
-        <button onclick="reiniciarJogo()">Jogar Novamente</button>
+        <p>Você completou o jogo em <span id="tempo-final"></span> segundos!</p>
+        <img id="imagem-final" src="" alt="Imagem final">
+        <div class="botoes">
+            <button onclick="reiniciarJogo()">Jogar Novamente</button>
+            <a href="index.html">
+                <button>Voltar</button>
+            </a>
+        </div>
     </div>
 </div>
 
 <script>
-    // Agora o array de cartas agrupa o valor (emoji/imagem) e a cor de fundo
-    //const cartas = [
-    //    { valor: '❤️', corFundo: '#f2a2b0' },
-      //  { valor: '🧡', corFundo: '#f7c8a4' },
-    //    { valor: '💛', corFundo: '#f7e6a4' },
-    //    { valor: '💚', corFundo: '#c8f7a4' },
-    //    { valor: '💙', corFundo: '#a4d4f7' },
-    //    { valor: '💜', corFundo: '#d4a4f7' },
-    //    { valor: '🤎', corFundo: '#c0a48b' },
-    //    { valor: '🖤', corFundo: '#a4a4a4' }
-    //    ];
+    // Array de cartas com valor (caminho da imagem) e cor de fundo
     const cartas = [
         { valor: 'Foto1.jpg', corFundo: '#f2a2b0' },
         { valor: 'Foto2.JPEG', corFundo: '#f7c8a4' },
@@ -203,26 +227,25 @@
         { valor: 'Foto7.JPEG', corFundo: '#c0a48b' },
         { valor: 'Foto8.JPEG', corFundo: '#a4a4a4' }
     ];
-    
-    // Você pode usar suas fotos aqui. Exemplo:
-    // const cartas = [
-    //     { valor: 'foto1.jpg', corFundo: '#f2a2b0' },
-    //     { valor: 'foto2.jpg', corFundo: '#f7c8a4' },
-    //     ...
-    // ];
 
     const gameBoard = document.querySelector('.game-board');
     const finalScreen = document.querySelector('.final-screen');
     const attemptsEl = document.querySelector('.attempts');
     const matchesEl = document.querySelector('.matches');
+    const tempoFinalEl = document.getElementById('tempo-final');
+    const imagemFinalEl = document.getElementById('imagem-final');
 
     let hasFlippedCard = false;
     let lockBoard = false;
     let firstCard, secondCard;
     let tentativas = 0;
     let paresEncontrados = 0;
+    let tempoInicial;
 
     function criarCartas() {
+        // Inicia o cronômetro
+        tempoInicial = Date.now();
+        
         const cartasComPares = [...cartas, ...cartas];
         const cartasEmbaralhadas = cartasComPares.sort(() => Math.random() - 0.5);
         gameBoard.innerHTML = '';
@@ -234,7 +257,7 @@
             card.dataset.cor = carta.corFundo;
 
             card.innerHTML = `
-                <div class="card-face">${isImage(carta.valor) ? `<img src="${carta.valor}" alt="card">` : carta.valor}</div>
+                <div class="card-face"><img src="${carta.valor}" alt="card"></div>
                 <div class="card-back"></div>
             `;
             
@@ -243,17 +266,12 @@
         });
     }
 
-    function isImage(value) {
-        return value.includes('.');
-    }
-
     function flipCard() {
         if (lockBoard) return;
         if (this === firstCard) return;
 
         this.classList.add('flip');
         
-        // Aplica a cor de fundo ao virar
         this.querySelector('.card-face').style.backgroundColor = this.dataset.cor;
 
         if (!hasFlippedCard) {
@@ -281,7 +299,7 @@
         matchesEl.textContent = `Pares: ${paresEncontrados}`;
 
         resetBoard();
-        checkWin();
+        finalizarJogo();
     }
 
     function unflipCards() {
@@ -290,7 +308,6 @@
         setTimeout(() => {
             firstCard.classList.remove('flip');
             secondCard.classList.remove('flip');
-            // Remove a cor de fundo ao desvirar
             firstCard.querySelector('.card-face').style.backgroundColor = 'var(--branco-puro)';
             secondCard.querySelector('.card-face').style.backgroundColor = 'var(--branco-puro)';
             resetBoard();
@@ -302,10 +319,24 @@
         [firstCard, secondCard] = [null, null];
     }
     
-    function checkWin() {
+    function finalizarJogo() {
         if (paresEncontrados === cartas.length) {
+            const tempoFinal = Date.now();
+            const tempoDecorrido = Math.floor((tempoFinal - tempoInicial) / 1000);
+
             gameBoard.style.display = 'none';
             finalScreen.style.display = 'flex';
+            tempoFinalEl.textContent = tempoDecorrido;
+
+            if (tempoDecorrido < 60) {
+                imagemFinalEl.src = 'APAIXONADA.png';
+            } else if (tempoDecorrido < 180) {
+                imagemFinalEl.src = 'FELIZ.png';
+            } else if (tempoDecorrido <= 300) {
+                imagemFinalEl.src = 'NEUTRA.png';
+            } else {
+                imagemFinalEl.src = 'RAIVA.png';
+            }
         }
     }
 

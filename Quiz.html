@@ -227,7 +227,7 @@
     </div>
     
     <div id="feedback-acerto">
-        <span>Parabéns, você acertou! ❤️</span>
+        <span>ISSO AI CUIÉ, você acertou! ❤️</span>
         <img id="imagem-acerto" src="" alt="Imagem de acerto">
     </div>
     <div id="feedback-erro">
@@ -240,10 +240,13 @@
 
 <script>
     const perguntas = [
-        { texto: "Em que lugar tivemos nosso primeiro beijo?", opcoes: ["Praia do Forte", "Parque do Ibirapuera", "Lagoa do Taquaral", "Em casa"], correta: 2 },
-        { texto: "Qual a nossa série favorita para ver juntos?", opcoes: ["The Office", "Friends", "Game of Thrones", "Black Mirror"], correta: 0 },
-        { texto: "Nossa comida favorita pra pedir no Ifood é...?", opcoes: ["Sushi", "Pizza", "Hambúrguer", "Comida Mexicana"], correta: 1 },
-        { texto: "Qual a música que mais nos marcou?", opcoes: ["Céu Azul", "Oceano", "Outra Vida", "Girassol"], correta: 0 }
+        { texto: "Em que lugar vimos o primeiro jogo da copa de 2022, juntos?", opcoes: ["Casa do Marcão", "Quarto do Gustavo", "Shopping", "Casa do Fernando"], correta: 1 },
+        { texto: "Qual a nossa série favorita para ver juntos?", opcoes: ["Family Guy", "Friends", "American Horror story", "Black Mirror"], correta: 2},
+        { texto: "Nossa comida favorita pra pedir é...?", opcoes: ["Sfiha", "Pizza", "Lanche", "Açai"], correta: 0 },
+        { texto: "Qual a música que mais nos marcou?", opcoes: ["Leal", "Like this", "Os anjos cantam", "Idiota"], correta: 0 },
+        { texto: "Quem fala mais palavrão?", opcoes: ["Você (Gustavo)", "Eu", "Minha mãe", "Benjamin"], correta: 0 },
+        { texto: "Oq aconteceu quando te pedi em namoro no lago da fé que nos fez rir por um bom tempo", opcoes: ["Um mendigo apareceu e...", "Crente estava dando agua e...", "Alguem caiu e ...", "Tentaram nos roubar e..."], correta: 0 }
+
     ];
 
     let perguntaAtual = 0;
@@ -301,7 +304,7 @@
     }
 
     function iniciarTimer() {
-        tempoRest = 10;
+        tempoRest = 15;
         timerEl.textContent = tempoRest;
         clearInterval(intervalo);
         intervalo = setInterval(() => {

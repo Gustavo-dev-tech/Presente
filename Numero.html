@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivinhe o Número</title>
+    <style>
+        /* Paleta de Cores */
+        :root {
+            --fundo-suave: #f7f0f5;
+            --texto-principal: #5e4d66;
+            --lilás-destaque: #8a2be2;
+            --rosa-claro: #f2a2b0;
+            --rosa-destaque: #e64d64;
+            --branco-puro: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--fundo-suave);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--texto-principal);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background-color: var(--branco-puro);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 95%;
+            width: 700px;
+        }
+
+        h1 {
+            color: var(--lilás-destaque);
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #input-palpite {
+            font-size: 2em;
+            text-align: center;
+            width: 150px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid var(--lilás-destaque);
+            color: var(--texto-principal);
+        }
+
+        #feedback {
+            font-size: 1.5em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .botoes {
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .botoes button, .botoes a {
+            background-color: var(--lilás-destaque);
+            color: var(--branco-puro);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .botoes button:hover, .botoes a:hover {
+            background-color: var(--rosa-destaque);
+        }
+
+        .final-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .final-screen h2 {
+            color: var(--lilás-destaque);
+            font-size: 2.5em;
+        }
+
+        .final-screen p {
+            font-size: 1.5em;
+            color: var(--texto-principal);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="jogo-ativo">
+        <h1>Adivinhe o Número</h1>
+        <p class="game-info">Pense em um número entre 1 e 100. Vamos ver se você consegue adivinhar o meu número secreto</p>
+        
+        <div class="game-board">
+            <input type="number" id="input-palpite" placeholder="?" min="1" max="100">
+            <button onclick="verificarPalpite()">Adivinhar</button>
+            <p id="feedback"></p>
+            <a href="index.html"><button>Voltar ao Menu</button></a>
+                
+        </div>
+    </div>
+
+    <div class="final-screen">
+        <h2 id="final-titulo">Parabén!</h2>
+        <p id="final-mensagem"></p>
+        <div class="botoes">
+            <button onclick="reiniciarJogo()">Jogar Novamente</button>
+            <a href="index.html">
+                <button>Voltar ao Menu</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let numeroSecreto
+    let tentativas = 0
+
+    let final_titulo = document.getElementById('final-titulo')
+
+    function iniciarJogo() {
+        // Gera um número aleatório entre 1 e 100
+        // Se você quiser um número específico (ex: uma data), mude a linha abaixo
+        numeroSecreto = Math.floor(Math.random() * 100) + 1;
+        
+        tentativas = 0
+        
+        document.getElementById('input-palpite').value = '';
+        document.getElementById('feedback').textContent = '';
+        document.querySelector('.jogo-ativo').style.display = 'block';
+        document.querySelector('.final-screen').style.display = 'none';
+    }
+
+    function verificarPalpite() {
+        const palpite = parseInt(document.getElementById('input-palpite').value);
+        const feedback = document.getElementById('feedback');
+
+        if (isNaN(palpite) || palpite < 1 || palpite > 100) {
+            feedback.textContent = 'Por favor, digite um número válido entre 1 e 100.';
+            return;
+        }
+        
+        tentativas++;
+        
+        if (palpite === numeroSecreto) {
+            finalizarJogo();
+        } else if (palpite < numeroSecreto) {
+            feedback.textContent = 'O número secreto é MAIOR!';
+        } else {
+            feedback.textContent = 'O número secreto é MENOR!';
+        }
+    }
+
+    function finalizarJogo() {
+        document.querySelector('.jogo-ativo').style.display = 'none';
+        document.querySelector('.final-screen').style.display = 'flex';
+        document.querySelector('.final-titulo').textContent = `O numero era ${numeroSecreto} `
+        
+        document.getElementById('final-mensagem').textContent = `Você acertou em ${tentativas} tentativas! ❤️`;
+    }
+
+    function reiniciarJogo() {
+        iniciarJogo();
+    }
+
+    iniciarJogo();
+</script>
+</body>

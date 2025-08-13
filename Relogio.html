@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Tempo Juntos</title>
+    <style>
+        /* Paleta de Cores do Jogo da Memória */
+        :root {
+            --fundo-suave: #f7f0f5; /* Lilás bem claro */
+            --texto-principal: #5e4d66; /* Lilás escuro */
+            --lilás-destaque: #8a2be2; /* Lilás vibrante */
+            --rosa-claro: #f2a2b0;
+            --rosa-destaque: #e64d64;
+            --branco-puro: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--fundo-suave);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--texto-principal);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--branco-puro);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 95%;
+            width: 700px;
+        }
+
+        h1 {
+            color: var(--lilás-destaque);
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .timer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--fundo-suave);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid var(--rosa-claro);
+        }
+
+        .timer-item .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--rosa-destaque);
+        }
+
+        .timer-item .label {
+            font-size: 1em;
+            color: var(--texto-principal);
+            margin-top: 5px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .button-back {
+            background-color: var(--lilás-destaque);
+            color: var(--branco-puro);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        
+        .button-back:hover {
+            background-color: var(--rosa-destaque);
+        }
+
+        /* Melhoria de responsividade para telas pequenas */
+        @media (max-width: 600px) {
+            .timer-grid {
+                grid-template-columns: 1fr; /* Muda para uma coluna em telas pequenas */
+                gap: 15px;
+            }
+            .timer-item {
+                padding: 15px;
+            }
+            .timer-item .value {
+                font-size: 2em;
+            }
+            .timer-item .label {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>O Nosso Tempo Juntos</h1>
+    <p class="subtitle">Desde o momento exato em que te pedi em namoro, já se passaram...</p>
+    
+    <div class="timer-grid">
+        <div class="timer-item full-width">
+            <span class="value" id="anos">0</span>
+            <span class="label">Anos</span>
+        </div>
+        <div class="timer-item full-width">
+            <span class="value" id="meses">0</span>
+            <span class="label">Meses</span>
+        </div>
+        <div class="timer-item full-width">
+            <span class="value" id="dias">0</span>
+            <span class="label">Dias</span>
+        </div>
+        <div class="timer-item">
+            <span class="value" id="horas">0</span>
+            <span class="label">Horas</span>
+        </div>
+        <div class="timer-item">
+            <span class="value" id="minutos">0</span>
+            <span class="label">Minutos</span>
+        </div>
+        <div class="timer-item full-width">
+            <span class="value" id="segundos">0</span>
+            <span class="label">Segundos</span>
+        </div>
+    </div>
+    <h4>Mesmo assim continuo sendo apaixonado por você</h4>
+
+    <a href="index.html" class="button-back">Voltar ao Menu</a>
+</div>
+
+<script>
+    const dataInicio = new Date('2022-11-12T18:40:57');
+
+    function atualizarContador() {
+        const agora = new Date();
+        const diferenca = agora.getTime() - dataInicio.getTime();
+        const segundosTotais = Math.floor(diferenca / 1000);
+        
+        let anos = Math.floor(segundosTotais / (365.25 * 24 * 60 * 60));
+        let segundosRestantes = segundosTotais % (365.25 * 24 * 60 * 60);
+
+        let meses = Math.floor(segundosRestantes / (30.44 * 24 * 60 * 60));
+        segundosRestantes = segundosRestantes % (30.44 * 24 * 60 * 60);
+
+        let dias = Math.floor(segundosRestantes / (24 * 60 * 60));
+        segundosRestantes = segundosRestantes % (24 * 60 * 60);
+
+        let horas = Math.floor(segundosRestantes / (60 * 60));
+        segundosRestantes = segundosRestantes % (60 * 60);
+        
+        let minutos = Math.floor(segundosRestantes / 60);
+        let segundos = segundosRestantes % 60;
+        
+        document.getElementById('anos').textContent = anos;
+        document.getElementById('meses').textContent = meses;
+        document.getElementById('dias').textContent = dias;
+        document.getElementById('horas').textContent = horas;
+        document.getElementById('minutos').textContent = minutos;
+        document.getElementById('segundos').textContent = Math.floor(segundos); // Arredondando para garantir que não haja casas decimais
+    }
+
+    setInterval(atualizarContador, 1000);
+    atualizarContador(); // Chama a função na primeira vez para não ter um delay de 1 segundo
+
+</script>
+</body>
+</html>
