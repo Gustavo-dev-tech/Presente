@@ -12,6 +12,8 @@
             --rosa-destaque: #e64d64;
             --rosa-claro: #f2a2b0;
             --branco-puro: #fff;
+            --verde-acerto: #4CAF50;
+            --vermelho-erro: #e74c3c; /* Nova cor para a mensagem de erro */
         }
 
         * {
@@ -44,6 +46,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            position: relative;
         }
         
         #quiz-content {
@@ -104,7 +107,9 @@
             font-weight: bold;
             cursor: pointer;
         }
-
+        .opcao.correta {
+            background-color: var(--verde-acerto);
+        }
         .opcao:hover {
             background-color: var(--rosa-destaque);
             transform: scale(1.02);
@@ -154,7 +159,30 @@
         .botoes-final button:hover {
             background-color: var(--rosa-destaque);
         }
-
+        
+        /* Estilo para a mensagem de acerto */
+        #feedback-acerto, #feedback-erro {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        #feedback-acerto {
+            background-color: var(--verde-acerto);
+            color: var(--branco-puro);
+        }
+        #feedback-erro {
+            background-color: var(--vermelho-erro);
+            color: var(--branco-puro);
+        }
+        
         /* Esconde os botões no print */
         @media print {
             .botoes-final {
@@ -178,13 +206,17 @@
         <p class="pontuacao-final">Você fez <span id="pontuacao-final"></span> pontos! ❤️</p>
         <div class="botoes-final">
             <button id="reiniciar">Jogar Novamente</button>
-            <button id="btn-print" onclick="window.print()">Tirar Print</button>
+            <button id="btn-print">Tirar Print</button>
         </div>
     </div>
+    
+    <div id="feedback-acerto"></div>
+    <div id="feedback-erro"></div>
 </div>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 <script>
-    // Suas perguntas e configuração Firebase
     const perguntas = [
         { texto: "Em que lugar tivemos nosso primeiro beijo?", opcoes: ["Praia do Forte", "Parque do Ibirapuera", "Lagoa do Taquaral", "Em casa"], correta: 2 },
         { texto: "Qual a nossa série favorita para ver juntos?", opcoes: ["The Office", "Friends", "Game of Thrones", "Black Mirror"], correta: 0 },
@@ -205,17 +237,20 @@
     const finalContainer = document.getElementById("final-container");
     const pontuacaoFinalEl = document.getElementById("pontuacao-final");
     const reiniciarBtn = document.getElementById("reiniciar");
+    const btnPrint = document.getElementById("btn-print");
+    const feedbackAcertoEl = document.getElementById("feedback-acerto");
+    const feedbackErroEl = document.getElementById("feedback-erro"); // Novo elemento de erro
 
     function mostrarPergunta() {
         if (perguntaAtual < perguntas.length) {
-            const p = perguntas[perguntaAtual];
+            const p = perguntas [perguntaAtual];
             perguntaEl.textContent = p.texto;
             opcoesContainer.innerHTML = "";
             p.opcoes.forEach((opcao, i) => {
                 const btn = document.createElement("button");
                 btn.classList.add("opcao");
                 btn.textContent = opcao;
-                btn.onclick = () => selecionarResposta(i);
+                btn.onclick = () => selecionarResposta(btn, i);
                 opcoesContainer.appendChild(btn);
             });
             iniciarTimer();
@@ -239,15 +274,36 @@
         }, 1000);
     }
 
-    function selecionarResposta(indice) {
+    function selecionarResposta(btnClicado, indice) {
         clearInterval(intervalo);
+        const opcoes = opcoesContainer.querySelectorAll('.opcao');
+        opcoes.forEach(btn => btn.disabled = true);
+
         const correta = perguntas[perguntaAtual].correta;
+
         if (indice === correta) {
             pontuacao++;
+            scoreEl.textContent = `❤️ ${pontuacao}`;
+            btnClicado.classList.add('correta');
+
+            feedbackAcertoEl.textContent = "Parabéns, você acertou! ❤️";
+            feedbackAcertoEl.style.display = 'block';
+
+            setTimeout(() => {
+                feedbackAcertoEl.style.display = 'none';
+                perguntaAtual++;
+                mostrarPergunta();
+            }, 1500);
+        } else {
+            feedbackErroEl.textContent = "Você não me ama! 😭";
+            feedbackErroEl.style.display = 'block';
+
+            setTimeout(() => {
+                feedbackErroEl.style.display = 'none';
+                perguntaAtual++;
+                mostrarPergunta();
+            }, 1500);
         }
-        scoreEl.textContent = `❤️ ${pontuacao}`;
-        perguntaAtual++;
-        mostrarPergunta();
     }
 
     function finalizarQuiz() {
@@ -256,9 +312,19 @@
         pontuacaoFinalEl.textContent = `${pontuacao} de ${perguntas.length}`;
     }
 
-    reiniciarBtn.onclick = () => location.reload();
+    function tirarPrint() {
+        const elementoParaCapturar = document.getElementById('final-container');
+        html2canvas(elementoParaCapturar).then(canvas => {
+            let link = document.createElement('a');
+            link.download = 'quiz-para-princesa.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
 
-    // Inicia o quiz automaticamente
+    reiniciarBtn.onclick = () => location.reload();
+    btnPrint.onclick = tirarPrint;
+
     mostrarPergunta();
 </script>
 </body>
